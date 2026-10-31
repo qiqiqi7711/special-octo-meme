@@ -41,7 +41,7 @@ class Settings:
         ).strip()
         self.llm_model: str = os.getenv("LLM_MODEL", "gpt-4o-mini").strip()
 
-        # 检索（可配置 provider；MVP 仅有 stub，真实接口预留）
+        # 检索（可配置 provider：tavily / brave / stub；真实接口已接入）
         self.search_provider: str = os.getenv("SEARCH_PROVIDER", "stub").strip()
         self.search_api_key: str = os.getenv("SEARCH_API_KEY", "").strip()
 

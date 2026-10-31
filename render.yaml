@@ -1,0 +1,22 @@
+# Render Blueprint：一条命令把后端部署到 Render（自带 HTTPS，可解决前端混合内容问题）。
+# 这是「快速拿到可访问 HTTPS 后端」的备选；国内正式演示建议用阿里云 ECS（见 deploy/aliyun-ecs.sh）。
+services:
+  - type: web
+    name: poc-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: LLM_BASE_URL
+        value: https://dashscope.aliyuncs.com/compatible-mode/v1
+      - key: LLM_MODEL
+        value: qwen-plus
+      - key: LLM_API_KEY
+        sync: false
+      - key: SEARCH_PROVIDER
+        value: tavily
+      - key: SEARCH_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://qiqiqi7711.github.io

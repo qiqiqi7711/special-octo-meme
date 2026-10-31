@@ -1,8 +1,17 @@
-// 与 FastAPI 后端通信的适配层。mock 阶段默认关闭（见 services/explorationService.ts 的 USE_MOCK）。
-// 接入真实后端时：将 USE_MOCK 设为 false，并把后端 app/schemas.py 的枚举与本前端对齐。
-import type { DimensionStatus, ExploreGoal, TopicMap } from "./types";
+// 与 FastAPI 后端通信的适配层。
+// 后端地址通过 VITE_API_BASE_URL 配置：本地开发用 /api（走 vite 代理），
+// 部署时填后端完整地址（如 https://api.example.com/api）。
+import type {
+  Dimension,
+  DimensionStatus,
+  EvidenceCard,
+  ExploreGoal,
+  SourceDocument,
+  SourceType,
+  TopicMap,
+} from "./types";
 
-const API_BASE = "/api";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 export interface HealthStatus {
   status: string;
@@ -86,4 +95,116 @@ export async function generateTopicMapFromBackend(
     suggestedNext: tm.suggested_next ?? [],
     disclaimer: tm.disclaimer ?? null,
   };
+}
+
+// 传给后端的维度信息（只取后端需要的字段，忽略前端多余的展示字段）。
+export interface DimensionPayload {
+  id: string;
+  title: string;
+  description: string;
+  keywords: string[];
+}
+
+function toDimensionPayload(dimension: Dimension): DimensionPayload {
+  return {
+    id: dimension.id,
+    title: dimension.title,
+    description: dimension.description,
+    keywords: dimension.keywords,
+  };
+}
+
+interface BackendEvidence {
+  id: string;
+  dimension_id: string;
+  title: string;
+  summary?: string;
+  source_name: string;
+  source_url?: string | null;
+  evidence_type?: string;
+  published_at?: string | null;
+  applicability?: string | null;
+  limitations?: string | null;
+  verified?: boolean;
+  verification_note?: string | null;
+}
+
+function mapEvidence(e: BackendEvidence): EvidenceCard {
+  return {
+    id: e.id,
+    dimensionId: e.dimension_id,
+    title: e.title,
+    summary: e.summary ?? "",
+    sourceName: e.source_name,
+    sourceUrl: e.source_url ?? null,
+    evidenceType: (e.evidence_type ?? "unknown") as EvidenceCard["evidenceType"],
+    publishedAt: e.published_at ?? null,
+    applicability: e.applicability ?? "",
+    limitations: e.limitations ?? "",
+    verified: e.verified ?? false,
+    verificationNote: e.verification_note ?? null,
+  };
+}
+
+export async function loadEvidenceFromBackend(
+  topic: string,
+  dimension: Dimension,
+  offset: number,
+  limit = 3
+): Promise<EvidenceCard[]> {
+  const resp = await fetch(`${API_BASE}/explore/evidence`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      topic,
+      dimension: toDimensionPayload(dimension),
+      offset,
+      limit,
+    }),
+  });
+  if (!resp.ok) {
+    const detail = await resp.text();
+    throw new Error(`请求失败 ${resp.status}: ${detail}`);
+  }
+  const data = (await resp.json()) as { cards?: BackendEvidence[] };
+  return (data.cards ?? []).map(mapEvidence);
+}
+
+interface BackendSourceDocument {
+  id: string;
+  title: string;
+  url: string;
+  source_name: string;
+  published_at?: string | null;
+  snippet?: string;
+  source_type?: string;
+  retrieved_at?: string | null;
+  is_mock?: boolean;
+}
+
+export async function loadSourcesFromBackend(
+  topic: string,
+  dimension: Dimension
+): Promise<SourceDocument[]> {
+  const resp = await fetch(`${API_BASE}/explore/sources`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic, dimension: toDimensionPayload(dimension) }),
+  });
+  if (!resp.ok) {
+    const detail = await resp.text();
+    throw new Error(`请求失败 ${resp.status}: ${detail}`);
+  }
+  const data = (await resp.json()) as { documents?: BackendSourceDocument[] };
+  return (data.documents ?? []).map((d) => ({
+    id: d.id,
+    title: d.title,
+    url: d.url,
+    sourceName: d.source_name,
+    publishedAt: d.published_at ?? null,
+    snippet: d.snippet ?? "",
+    sourceType: (d.source_type ?? "unknown") as SourceType,
+    retrievedAt: d.retrieved_at ?? new Date().toISOString(),
+    isMock: d.is_mock ?? false,
+  }));
 }

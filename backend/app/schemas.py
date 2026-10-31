@@ -78,3 +78,49 @@ class ExploreRequest(BaseModel):
 
 class ExploreResponse(BaseModel):
     topic_map: TopicMap
+
+
+class SourceDocument(BaseModel):
+    """一条可追溯的真实来源（用于「该方向资料」列表）。"""
+
+    id: str
+    title: str
+    url: str
+    source_name: str
+    published_at: str | None = None
+    snippet: str = ""
+    source_type: EvidenceType = EvidenceType.unknown
+    retrieved_at: str | None = None
+    is_mock: bool = True
+
+
+class DimensionInput(BaseModel):
+    """检索请求携带的维度信息（探索方向假设）。"""
+
+    id: str
+    title: str
+    description: str = ""
+    keywords: list[str] = Field(default_factory=list)
+
+
+class EvidenceRequest(BaseModel):
+    topic: str = Field(..., min_length=1, max_length=200)
+    dimension: DimensionInput
+    offset: int = Field(0, ge=0)
+    limit: int = Field(3, ge=1, le=10)
+
+
+class EvidenceResponse(BaseModel):
+    cards: list[EvidenceCard] = Field(default_factory=list)
+    query: str | None = None
+    has_more: bool = False
+
+
+class SourcesRequest(BaseModel):
+    topic: str = Field(..., min_length=1, max_length=200)
+    dimension: DimensionInput
+
+
+class SourcesResponse(BaseModel):
+    documents: list[SourceDocument] = Field(default_factory=list)
+    query: str | None = None

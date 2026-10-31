@@ -1,8 +1,13 @@
 // 服务门面：UI 只依赖这里的函数，不直接接触 mock 或 HTTP 细节。
-// 切换 USE_MOCK = false 即可接入真实 FastAPI 后端。
-import { generateTopicMapFromBackend } from "../api";
+// 是否使用 mock 由构建环境变量 VITE_USE_MOCK 决定（"true" 则走 mock，否则走真实后端）。
+import {
+  generateTopicMapFromBackend,
+  loadEvidenceFromBackend,
+  loadSourcesFromBackend,
+} from "../api";
 import { EVIDENCE_TYPE_LABELS } from "../labels";
 import type {
+  Dimension,
   EvidenceCard,
   ExplorationReport,
   ExploreGoal,
@@ -12,7 +17,7 @@ import type {
 } from "../types";
 import { buildMockTopicMap, getMockEvidence, getMockReportExtras, getMockSources } from "./mockData";
 
-export const USE_MOCK = true;
+export const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -26,28 +31,26 @@ export async function generateTopicMap(topic: string, goal: ExploreGoal): Promis
 
 export async function loadEvidence(
   topic: string,
-  dimensionId: string,
+  dimension: Dimension,
   offset: number,
   limit = 3
 ): Promise<EvidenceCard[]> {
   if (USE_MOCK) {
     await delay(300);
-    return getMockEvidence(topic, dimensionId, offset, limit);
+    return getMockEvidence(topic, dimension.id, offset, limit);
   }
-  // TODO: 接入后端证据检索接口（GET /api/explore/evidence?dimension_id=...）
-  return [];
+  return loadEvidenceFromBackend(topic, dimension, offset, limit);
 }
 
 export async function loadSources(
   topic: string,
-  directionId: string
+  dimension: Dimension
 ): Promise<SourceDocument[]> {
   if (USE_MOCK) {
     await delay(400);
-    return getMockSources(topic, directionId);
+    return getMockSources(topic, dimension.id);
   }
-  // TODO: 接入后端检索接口（返回 SourceDocument 列表）
-  return [];
+  return loadSourcesFromBackend(topic, dimension);
 }
 
 export function buildReport(input: {
@@ -79,7 +82,8 @@ export function buildReport(input: {
     .filter((t) => (counts.get(t) ?? 0) > 0)
     .map((t) => ({ type: t, label: EVIDENCE_TYPE_LABELS[t], count: counts.get(t)! }));
 
-  const extras = getMockReportExtras(topicMap.topic);
+  // 真实模式下不混入 mock 的「重复来源 / 开放问题」，留待阶段二基于真实数据计算。
+  const extras = USE_MOCK ? getMockReportExtras(topicMap.topic) : { possibleDuplicates: [], openQuestions: [] };
 
   return {
     topic: topicMap.topic,

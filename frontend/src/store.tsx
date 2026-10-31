@@ -50,10 +50,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const loadMoreEvidence = useCallback(
     async (id: string) => {
       if (!topicMap) return;
+      const dimension = topicMap.dimensions.find((d) => d.id === id);
+      if (!dimension) return;
       setLoadingEvidence(true);
       try {
         const offset = offsets[id] ?? 0;
-        const cards = await loadEvidence(topicMap.topic, id, offset);
+        const cards = await loadEvidence(topicMap.topic, dimension, offset);
         if (cards.length > 0) {
           setEvidenceByDimension((prev) => ({ ...prev, [id]: [...(prev[id] ?? []), ...cards] }));
           setOffsets((prev) => ({ ...prev, [id]: offset + cards.length }));

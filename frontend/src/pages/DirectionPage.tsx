@@ -47,14 +47,13 @@ export default function DirectionPage() {
   }
 
   const topic = topicMap.topic;
-  const directionId = dimension.id;
 
-  async function handleViewMaterials() {
+  const handleViewMaterials = async () => {
     setShowMaterials(true);
     setLoadingSources(true);
     setError(null);
     try {
-      const docs = await loadSources(topic, directionId);
+      const docs = await loadSources(topic, dimension);
       setSources(docs);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
