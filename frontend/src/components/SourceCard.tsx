@@ -11,9 +11,9 @@ export default function SourceCard({ doc }: Props) {
   const hasUrl = doc.url.trim().length > 0;
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-5">
+    <article className="glass rounded-control p-5 transition hover:shadow-card-hover">
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-semibold text-slate-900">{doc.title}</h3>
+        <h3 className="font-semibold text-ink-title">{doc.title}</h3>
         <div className="flex shrink-0 items-center gap-2">
           {doc.isMock && (
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
@@ -24,11 +24,11 @@ export default function SourceCard({ doc }: Props) {
         </div>
       </div>
 
-      <p className="mt-2 text-sm leading-relaxed text-slate-600">
+      <p className="mt-2 text-sm leading-relaxed text-ink-body">
         {doc.snippet.trim() ? doc.snippet : "暂无摘要。"}
       </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-muted">
         <span>来源：{doc.sourceName}</span>
         <span>{doc.publishedAt ? doc.publishedAt : "发布日期未知"}</span>
       </div>
@@ -39,12 +39,12 @@ export default function SourceCard({ doc }: Props) {
             href={doc.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium text-indigo-600 hover:underline"
+            className="text-sm font-medium text-brand-600 hover:text-brand-800 hover:underline"
           >
             查看原文 ↗
           </a>
         ) : (
-          <span className="text-sm text-slate-400">无可用链接</span>
+          <span className="text-sm text-ink-muted">无可用链接</span>
         )}
       </div>
     </article>

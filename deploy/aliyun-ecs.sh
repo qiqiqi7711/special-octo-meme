@@ -34,7 +34,7 @@ if [ ! -f "$ENV_FILE" ]; then
   cat > "$ENV_FILE" <<'EOF'
 LLM_API_KEY=
 LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-LLM_MODEL=qwen-plus
+LLM_MODEL=deepseek-v4.1-flash
 SEARCH_PROVIDER=tavily
 SEARCH_API_KEY=
 CORS_ORIGINS=*

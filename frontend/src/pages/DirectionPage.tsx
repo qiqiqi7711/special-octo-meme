@@ -19,10 +19,10 @@ export default function DirectionPage() {
   if (!topicMap) {
     return (
       <div className="py-24 text-center">
-        <p className="text-slate-500">尚未开始探索。</p>
+        <p className="text-ink-muted">尚未开始探索。</p>
         <button
           onClick={() => navigate("/")}
-          className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+          className="mt-4 rounded-full bg-brand-600 px-4 py-2 text-white shadow-button transition hover:bg-brand-700 active:scale-[0.98]"
         >
           去首页开始
         </button>
@@ -35,10 +35,10 @@ export default function DirectionPage() {
   if (!dimension) {
     return (
       <div className="py-24 text-center">
-        <p className="text-slate-500">未找到该探索方向。</p>
+        <p className="text-ink-muted">未找到该探索方向。</p>
         <button
           onClick={() => navigate("/map")}
-          className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+          className="mt-4 rounded-full bg-brand-600 px-4 py-2 text-white shadow-button transition hover:bg-brand-700 active:scale-[0.98]"
         >
           返回方向列表
         </button>
@@ -71,13 +71,13 @@ export default function DirectionPage() {
         onBack={() => navigate("/map")}
       />
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6">
+      <section className="glass rounded-card p-6">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">该方向资料</h2>
+          <h2 className="text-lg font-semibold text-ink-title">该方向资料</h2>
           {!showMaterials && (
             <button
               onClick={handleViewMaterials}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
+              className="rounded-full bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-button transition hover:bg-brand-700 active:scale-[0.98]"
             >
               查看该方向资料
             </button>
@@ -85,7 +85,7 @@ export default function DirectionPage() {
         </div>
 
         {showMaterials && loadingSources && (
-          <p className="mt-4 py-8 text-center text-slate-400">正在加载资料…</p>
+          <p className="mt-4 py-8 text-center text-ink-muted">正在加载资料…</p>
         )}
 
         {showMaterials && !loadingSources && error && (
@@ -93,7 +93,7 @@ export default function DirectionPage() {
         )}
 
         {showMaterials && !loadingSources && !error && sources.length === 0 && (
-          <p className="mt-4 py-8 text-center text-slate-400">该方向暂无资料。</p>
+          <p className="mt-4 py-8 text-center text-ink-muted">该方向暂无资料。</p>
         )}
 
         {showMaterials && !loadingSources && !error && sources.length > 0 && (
